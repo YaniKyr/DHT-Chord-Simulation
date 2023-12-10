@@ -1,10 +1,12 @@
 from pyspark.sql import SparkSession
 import pandas as pd
+import pyspark
 import json
-#Temporary parsing in order to prcced
-#Problem in data decoding. Functions of panda
-#cannot parse this data format. Not exactly json
-#Also in this case must deal with lossy data 
+import os
+#Fixes in the dataframe must be done
+#Best solution 3 columns, 1. Data, 2. Datetime, 3. Values
+
+#Handle the data. Transform them into a proper json format
 def datafileTransform(file):
     testfile = []
     with open(file,'r') as file:
@@ -13,16 +15,19 @@ def datafileTransform(file):
             testfile.append(line.replace('\n',','))
         
 
-    with open('out.txt','w') as file:
+    with open('aux.txt','w') as file:
         file.write('['+''.join(testfile[:-1])+''.join(testfile[-1][:-1])+']')
     
     
 def parse(file):
     
     datafileTransform(file)
-    with open('out.txt','r') as fp:
+    with open('aux.txt','r') as fp:
         data_list = json.load(fp)
+    fp.close()
+    os.remove('./aux.txt')
 
+    
     dfs = []
     for data in data_list:
         
@@ -31,7 +36,21 @@ def parse(file):
         df['value'] = pd.to_numeric(df['value'])
         dfs.append(df)
     pdd = pd.concat(dfs,ignore_index=True)
-    print(pdd)
+    return pdd
 
 
-parse('./hum.txt')
+df = parse('./tempm.txt')
+
+#Check for missing Values
+print(df.isnull().sum().sort_values(ascending = False))
+
+
+#Fill the missing values
+
+#----------------------
+#Start SparkSession
+spark = SparkSession.builder.appName('W1').getOrCreate()
+
+pdf = spark.createDataFrame(df)
+print("Is nULL",pyspark.pand.isna(pdf['values']))
+print(pdf.select('datetime','value').where('MIN(value)==18 AND MAX(value)==22').show(100))
