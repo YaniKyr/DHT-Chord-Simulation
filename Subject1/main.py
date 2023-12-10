@@ -8,11 +8,13 @@ import json
 def datafileTransform(file):
     testfile = []
     with open(file,'r') as file:
+        
         for line in file:
             testfile.append(line.replace('\n',','))
-            
+        
+
     with open('out.txt','w') as file:
-        file.write('['+''.join(testfile)+']')
+        file.write('['+''.join(testfile[:-1])+''.join(testfile[-1][:-1])+']')
     
     
 def parse(file):
