@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import desc, max, asc,  min
+from pyspark.sql.functions import desc, max, asc,  min,col, count, month, stddev
 import pandas as pd
 import pyspark
 import json
@@ -57,8 +57,11 @@ def parse(file):
   
 
 
-df = parse('./tempm.txt')
-df = handleMissingData(df)
+tdf = parse('./tempm.txt')
+tdf = handleMissingData(tdf) 
+
+hdf = parse('./hum.txt')
+hdf = handleMissingData(hdf)
 #Check for missing Values
 
 
@@ -66,14 +69,40 @@ df = handleMissingData(df)
 #Fill the missing values
 
 #----------------------
+
 #Start SparkSession
+
 spark = SparkSession.builder.appName('W1').getOrCreate()
-df['date']=pd.to_datetime(df['datetime']).dt.date
-pdf = spark.createDataFrame(df)
 
-#pdf.select(pdf.date,pdf.value).where(pdf.value.between(18,22)).distinct().show()
+tdf['date']=pd.to_datetime(tdf['datetime']).dt.date
+tdf = spark.createDataFrame(tdf)
 
-pdf.groupBy("date").agg(max("value").alias('max_val')).sort(desc("max_val")).limit(10).show()
+hdf = spark.createDataFrame(hdf)
 
 
-pdf.groupBy("date").agg(min("value").alias('min_val')).sort(asc("min_val")).limit(10).show()
+#Find the temperature between a specified range
+tdates = tdf.filter(col('value').between(18,22)).groupBy('date').agg(count('value'))
+print('+----------+')
+print("|Rows Found|")
+print("+----------+")
+print(f'|{tdates.count()}        |')
+print("+----------+")
+#Top 10 hottest days
+tdf.groupBy("date").agg(max("value").alias('max_val')).sort(desc("max_val")).limit(10).show()
+
+#Top 10 coldest days
+tdf.groupBy("date").agg(min("value").alias('min_val')).sort(asc("min_val")).limit(10).show()
+
+#STD per month
+hdf.groupBy(month('datetime')).agg(stddev('value')).show()
+
+
+'''
+#Reapeat the calculation of std for specified month
+
+#Get the values column of a specified month
+test = hdf.select('datetime','value').where(month('datetime')==3)
+
+#Calculate the values of the column
+test.select(stddev('value')).show()
+'''
