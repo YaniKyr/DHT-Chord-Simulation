@@ -1,4 +1,5 @@
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import desc, max, asc,  min
 import pandas as pd
 import pyspark
 import json
@@ -67,7 +68,12 @@ df = handleMissingData(df)
 #----------------------
 #Start SparkSession
 spark = SparkSession.builder.appName('W1').getOrCreate()
-
+df['date']=pd.to_datetime(df['datetime']).dt.date
 pdf = spark.createDataFrame(df)
 
-print(pdf.select('datetime','value').where('MIN(value)==18 AND MAX(value)==22').show(100))
+#pdf.select(pdf.date,pdf.value).where(pdf.value.between(18,22)).distinct().show()
+
+pdf.groupBy("date").agg(max("value").alias('max_val')).sort(desc("max_val")).limit(10).show()
+
+
+pdf.groupBy("date").agg(min("value").alias('min_val')).sort(asc("min_val")).limit(10).show()
