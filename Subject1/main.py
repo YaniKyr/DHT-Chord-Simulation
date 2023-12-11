@@ -7,6 +7,17 @@ import os
 #Best solution 3 columns, 1. Data, 2. Datetime, 3. Values
 
 #Handle the data. Transform them into a proper json format
+
+def handleMissingData(df):
+    msdate = df[df['value'].isnull() == True]['datetime']
+    
+    for i,_ in enumerate(msdate):
+        index = df['datetime'].dt.date==msdate.iloc[i].date()
+        df[index] = df[index].fillna(df[index].mean())
+
+    return df
+
+
 def datafileTransform(file):
     testfile = []
     with open(file,'r') as file:
@@ -15,17 +26,19 @@ def datafileTransform(file):
             testfile.append(line.replace('\n',','))
         
 
-    with open('aux.txt','w') as file:
-        file.write('['+''.join(testfile[:-1])+''.join(testfile[-1][:-1])+']')
+    file =  open('temp.txt','w')
+    file.write('['+''.join(testfile[:-1])+''.join(testfile[-1][:-1])+']')
     
     
 def parse(file):
     
     datafileTransform(file)
-    with open('aux.txt','r') as fp:
+
+    
+    with open('./temp.txt','r') as fp:
         data_list = json.load(fp)
     fp.close()
-    os.remove('./aux.txt')
+    os.remove('./temp.txt')
 
     
     dfs = []
@@ -36,13 +49,17 @@ def parse(file):
         df['value'] = pd.to_numeric(df['value'])
         dfs.append(df)
     pdd = pd.concat(dfs,ignore_index=True)
+    pdd.sort_values(by='datetime',inplace=True)
+    
     return pdd
+    
+  
 
 
 df = parse('./tempm.txt')
-
+df = handleMissingData(df)
 #Check for missing Values
-print(df.isnull().sum().sort_values(ascending = False))
+
 
 
 #Fill the missing values
@@ -52,5 +69,5 @@ print(df.isnull().sum().sort_values(ascending = False))
 spark = SparkSession.builder.appName('W1').getOrCreate()
 
 pdf = spark.createDataFrame(df)
-print("Is nULL",pyspark.pand.isna(pdf['values']))
+
 print(pdf.select('datetime','value').where('MIN(value)==18 AND MAX(value)==22').show(100))
