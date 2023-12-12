@@ -1,7 +1,6 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import desc, max, asc,  min,col, count, month, stddev
+import pyspark.sql.functions as func
 import pandas as pd
-import pyspark
 import json
 import os
 #Fixes in the dataframe must be done
@@ -55,7 +54,12 @@ def parse(file):
     return pdd
     
   
+def humTempIndex(df):
+    results =[]
+    for  row in df.collect():
+        results.append(row['temp']-0.55*(1-0.01*row['hum'])*(row['temp']-14.5))
 
+    print(f'max:{max(results)}, min:{min(results)}')
 
 tdf = parse('./tempm.txt')
 tdf = handleMissingData(tdf) 
@@ -81,28 +85,40 @@ hdf = spark.createDataFrame(hdf)
 
 
 #Find the temperature between a specified range
-tdates = tdf.filter(col('value').between(18,22)).groupBy('date').agg(count('value'))
+tdates = tdf.filter(func.col('value').between(18,22)).groupBy('date').agg(func.count('value'))
 print('+----------+')
 print("|Rows Found|")
 print("+----------+")
 print(f'|{tdates.count()}        |')
 print("+----------+")
 #Top 10 hottest days
-tdf.groupBy("date").agg(max("value").alias('max_val')).sort(desc("max_val")).limit(10).show()
+tdf.groupBy("date").agg(func.max("value").alias('func.max_val')).sort(func.func.desc("func.max_val")).limit(10).show()
 
 #Top 10 coldest days
-tdf.groupBy("date").agg(min("value").alias('min_val')).sort(asc("min_val")).limit(10).show()
+tdf.groupBy("date").agg(func.min("value").alias('func.min_val')).sort(func.asc("func.min_val")).limit(10).show()
 
 #STD per month
-hdf.groupBy(month('datetime')).agg(stddev('value')).show()
+hdf.groupBy(func.month('datetime')).agg(func.stddev('value')).show()
 
+
+tdf = tdf.withColumnRenamed('value','temp')
+hdf = hdf.withColumnRenamed('value','hum')
 
 '''
 #Reapeat the calculation of std for specified month
 
 #Get the values column of a specified month
-test = hdf.select('datetime','value').where(month('datetime')==3)
+test = hdf.select('datetime','value').where(func.month('datetime')==3)
 
 #Calculate the values of the column
-test.select(stddev('value')).show()
+test.select(func.stddev('value')).show()
 '''
+
+#Change the name of the columns
+#--Join them to a single dataframe
+tdf = tdf.withColumnRenamed('value','temp')
+hdf = hdf.withColumnRenamed('value','hum')
+
+aux = tdf.join(hdf,tdf['datetime']==hdf['datetime'])
+
+humTempIndex(aux)
