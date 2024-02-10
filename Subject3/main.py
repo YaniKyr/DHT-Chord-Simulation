@@ -21,7 +21,7 @@ def importData():
     df_original.reset_index(inplace=True)
     df_original = df_original.rename(columns=df_original.loc[0])
     df_original = df_original.loc[1:]
-    print(df_original.isnull().sum().sort_values(ascending=False))
+    #print(df_original.isnull().sum().sort_values(ascending=False))
 
     df_original['Switzerland'] = df_original['Switzerland'].fillna(0)
     df_original['Turkey'] = df_original['Turkey'].fillna(df_original['Turkey'].mean())
@@ -39,20 +39,38 @@ def importData():
     return df_original
 
 df = importData()
-print(df.head(10))
+
 
 spark = SparkSession.builder.appName('W1').getOrCreate()
 
 sdf = spark.createDataFrame(df)
-# Filter the DataFrame to include only the years from 2007 to 2014
-filtered_df = sdf.filter((F.col("GEO/TIME") >= 2007) & (F.col("GEO/TIME") <= 2014))
 
-# Calculate the mean for each country
-mean_df = filtered_df.select(
-    [F.mean(col_name).alias(col_name) for col_name in sdf.columns[1:]]
-)
-mean_df.show(20)
-# Next steps
-#Pivot the table
-# Get the mean of the table
-# Replace every missing value
+countries =["Belgium","Bulgaria","Estonia","Hungary","Germany (until 1990 former territory of the FRG)"]
+
+def HigherCountryMargin():
+    # Filter the DataFrame to include only the years from 2007 to 2014
+    filtered_df = sdf.filter((F.col("GEO/TIME") >= 2007) & (F.col("GEO/TIME") <= 2014))
+
+    # Calculate the mean for each country
+    mean_df = filtered_df.select(
+        [F.mean(col_name).alias(col_name) for col_name in sdf.columns[1:]])
+    mean_df.show()
+
+
+def higherThan(sdf, countries, target ="Greece"):
+    dcoll = sdf.collect()
+    
+    
+    
+    for country in countries:
+        count = 0
+        print(country,":\n","Year:")
+        for row in dcoll:
+            
+            if row[target] > row[country]:
+                print (row["GEO/TIME"])
+                count+=1
+        print("Times",count)
+
+#1
+max_values_df = sdf.select("Name", F.greatest(*[F.col(c) for c in df.columns[1:]]).alias("Max_Value"))
