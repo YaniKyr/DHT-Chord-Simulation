@@ -1,8 +1,6 @@
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as func
 import pandas as pd
-import json
-import os
 
 
 def getMeanByMont(df):

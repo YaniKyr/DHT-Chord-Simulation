@@ -95,7 +95,7 @@ print("+----------+")
 tdf.groupBy("date").agg(func.max("value").alias('max_val')).sort(func.desc("max_val")).limit(10).show()
 
 #Top 10 coldest days
-tdf.groupBy("date").agg(func.min("value").alias('func.min_val')).sort(func.asc("func.min_val")).limit(10).show()
+tdf.groupBy("date").agg(func.min("value").alias('min_val')).sort(func.asc("min_val")).limit(10).show()
 
 #STD per month
 hdf.groupBy(func.month('datetime')).agg(func.stddev('value')).show()

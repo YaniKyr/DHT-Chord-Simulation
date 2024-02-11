@@ -77,4 +77,4 @@ tt = sdf.withColumn('new',(F.greatest(*countries)))
 for country in countries:
     mt = tt.filter(tt[country] == tt.new).count()
     if mt >0:
-        print(country)γ
+        print(country)
