@@ -58,19 +58,23 @@ def HigherCountryMargin():
 
 
 def higherThan(sdf, countries, target ="Greece"):
-    dcoll = sdf.collect()
-    
-    
     
     for country in countries:
-        count = 0
-        print(country,":\n","Year:")
-        for row in dcoll:
-            
-            if row[target] > row[country]:
-                print (row["GEO/TIME"])
-                count+=1
-        print("Times",count)
+        ndf= 0
+        ndf = sdf.select(F.col(target), F.col(country))
+        df_new = ndf.withColumn('res', ndf[target] > ndf[country]).groupby('res').count()
+        print('Compare',target,'with',country)
+        df_new.select('count').where(df_new.res==True).show()
 
 #1
-max_values_df = sdf.select("Name", F.greatest(*[F.col(c) for c in df.columns[1:]]).alias("Max_Value"))
+#max_values_df = sdf.select("Name", F.greatest(*[F.col(c) for c in df.columns[1:]]).alias("Max_Value"))
+
+countries = [x.name for x in sdf.schema.fields]
+countries = countries[1:]
+
+tt = sdf.withColumn('new',(F.greatest(*countries)))
+
+for country in countries:
+    mt = tt.filter(tt[country] == tt.new).count()
+    if mt >0:
+        print(country)γ
