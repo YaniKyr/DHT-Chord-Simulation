@@ -3,7 +3,8 @@ import pyspark.sql.functions as func
 import pandas as pd
 
 
-def getMeanByMont(df):
+def getMeanByMonth(df):
+    #TODO Add Volume
     df.groupBy(func.year('Date'),func.month('Date')).\
     agg(func.mean('Open')).\
     sort(func.asc(func.year('Date')) , func.asc(func.month('Date'))).\
@@ -72,9 +73,9 @@ ainvdf = spark.createDataFrame(aidf)
 alendf = spark.createDataFrame(aldf)
 
 """ 
-getMeanByMont(agndf)
-getMeanByMont(ainvdf)
-getMeanByMont(aldf) 
+getMeanByMonth(agndf)
+getMeanByMonth(ainvdf)
+getMeanByMonth(aldf) 
 
 higherThan(agndf)
 higherThan(ainvdf)

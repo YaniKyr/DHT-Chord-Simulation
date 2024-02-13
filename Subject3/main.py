@@ -1,4 +1,5 @@
 from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType,StructField,IntegerType
 import pyspark.sql.functions as F
 import pandas as pd
 from pyspark.ml.feature import VectorAssembler
@@ -71,10 +72,27 @@ def higherThan(sdf, countries, target ="Greece"):
 
 countries = [x.name for x in sdf.schema.fields]
 countries = countries[1:]
-
+'''
 tt = sdf.withColumn('new',(F.greatest(*countries)))
 
 for country in countries:
     mt = tt.filter(tt[country] == tt.new).count()
     if mt >0:
         print(country)
+'''
+
+schema = StructType([StructField(ele,IntegerType(),True) for ele in countries])
+
+for country in countries:
+    tt = sdf.groupby('GEO/TIME','Belgium',country).agg(F.col('Belgium')<sdf[country]).withColumnRenamed(f'(Belgium < {country})','compare')
+
+empty_df = spark.createDataFrame([],schema)
+schema['GEO/TIME'] = sdf['GEO/TIME']
+#Make trues to ones
+pp= tt.select(F.col('compare').cast("integer") )
+#Add two columns
+pp = pp.select('revenue',pp.compare+pp.compare)
+#Get the max from each row
+#print yesars
+
+
