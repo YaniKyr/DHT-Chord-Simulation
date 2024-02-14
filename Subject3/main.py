@@ -81,17 +81,25 @@ for country in countries:
         print(country)
 '''
 
-schema = StructType([StructField(ele,IntegerType(),True) for ele in countries])
-
+replica = sdf
 for country in countries:
-    tt = sdf.groupby('GEO/TIME','Belgium',country).agg(F.col('Belgium')<sdf[country]).withColumnRenamed(f'(Belgium < {country})','compare')
+    replica = replica.withColumn(country,F.lit(0))
 
-empty_df = spark.createDataFrame([],schema)
-schema['GEO/TIME'] = sdf['GEO/TIME']
-#Make trues to ones
-pp= tt.select(F.col('compare').cast("integer") )
+
+for i,country in enumerate(countries):
+    for cj in countries:
+        if country == cj: continue
+        tt = sdf.groupby('GEO/TIME',country,cj).agg(F.col(country)<sdf[cj]).withColumnRenamed(f'({country} < {cj})','compare')
+        #Make trues to ones
+        pp= tt.select('GEO/TIME',F.col('compare').cast("integer") )
+        replica = replica.join(pp,pp['GEO/TIME']==replica['GEO/TIME'],'inner').drop(replica['GEO/TIME'])
+        replica = replica.withColumn(country,F.col(country) + F.col('compare')).drop('compare')
+        
+
+replica.show()
+ 
 #Add two columns
-pp = pp.select('revenue',pp.compare+pp.compare)
+
 #Get the max from each row
 #print yesars
 
