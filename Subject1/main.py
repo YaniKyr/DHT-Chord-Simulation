@@ -85,11 +85,11 @@ hdf = spark.createDataFrame(hdf)
 
 
 #Find the temperature between a specified range
-#dates = tdf.filter(func.col('value').between(18,22)).groupBy('date').agg(func.count('value'))
+tdates = tdf.filter(func.col('value').between(18,22)).groupBy('date').agg(func.count('value'))
 print('+----------+')
 print("|Rows Found|")
 print("+----------+")
-#print(f'|{tdates.count()}        |')
+print(f'|{tdates.count()}        |')
 print("+----------+")
 #Top 10 hottest days
 #tdf.groupBy("date").agg(func.max("value").alias('max_val')).sort(func.desc("max_val")).limit(10).show()
