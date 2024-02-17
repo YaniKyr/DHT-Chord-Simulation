@@ -85,22 +85,27 @@ hdf = spark.createDataFrame(hdf)
 
 
 #Find the temperature between a specified range
-tdates = tdf.filter(func.col('value').between(18,22)).groupBy('date').agg(func.count('value'))
+#dates = tdf.filter(func.col('value').between(18,22)).groupBy('date').agg(func.count('value'))
 print('+----------+')
 print("|Rows Found|")
 print("+----------+")
-print(f'|{tdates.count()}        |')
+#print(f'|{tdates.count()}        |')
 print("+----------+")
 #Top 10 hottest days
-tdf.groupBy("date").agg(func.max("value").alias('max_val')).sort(func.desc("max_val")).limit(10).show()
+#tdf.groupBy("date").agg(func.max("value").alias('max_val')).sort(func.desc("max_val")).limit(10).show()
 
 #Top 10 coldest days
-tdf.groupBy("date").agg(func.min("value").alias('min_val')).sort(func.asc("min_val")).limit(10).show()
+#tdf.groupBy("date").agg(func.min("value").alias('min_val')).sort(func.asc("min_val")).limit(10).show()
 
 #STD per month 
-#TODO GET THE MAX STD
-hdf.groupBy(func.month('datetime')).agg(func.stddev('value')).show()
 
+tt = hdf.groupBy(func.month('datetime')).agg(func.stddev('value'))
+
+max_stddev_value = tt.agg(func.max("stddev(value)").alias("max_stddev")).collect()[0]["max_stddev"]
+
+# Filter the DataFrame to get the row with the maximum value of stddev(value)
+max_stddev_row = tt.filter(tt["stddev(value)"] == max_stddev_value)
+max_stddev_row.show()
 
 tdf = tdf.withColumnRenamed('value','temp')
 hdf = hdf.withColumnRenamed('value','hum')

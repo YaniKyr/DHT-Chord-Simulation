@@ -46,7 +46,7 @@ spark = SparkSession.builder.appName('W1').getOrCreate()
 
 sdf = spark.createDataFrame(df)
 
-countries =["Belgium","Bulgaria","Estonia","Hungary","Germany (until 1990 former territory of the FRG)"]
+countries =["Spain","Bulgaria","France","Hungary","Germany"]
 
 def HigherCountryMargin():
     # Filter the DataFrame to include only the years from 2007 to 2014
@@ -58,14 +58,14 @@ def HigherCountryMargin():
     mean_df.show()
 
 
-def higherThan(sdf, countries, target ="Greece"):
+def higherThan( countries, target ="Greece"):
     
     for country in countries:
         ndf= 0
         ndf = sdf.select(F.col(target), F.col(country))
         df_new = ndf.withColumn('res', ndf[target] > ndf[country]).groupby('res').count()
         print('Compare',target,'with',country)
-        df_new.select('count').where(df_new.res==True).show()
+        df_new.select('*',F.when(df_new.res == True,1).otherwise(0)).show()
 
 #1
 #max_values_df = sdf.select("Name", F.greatest(*[F.col(c) for c in df.columns[1:]]).alias("Max_Value"))
@@ -76,31 +76,40 @@ countries = countries[1:]
 tt = sdf.withColumn('new',(F.greatest(*countries)))
 
 for country in countries:
-    mt = tt.filter(tt[country] == tt.new).count()
-    if mt >0:
-        print(country)
+    ll = tt.select('GEO/TIME',country).where(tt[country] == tt.new)
+    if len(ll.head(1))!=0:
+        ll.show()
+
 '''
 
-replica = sdf
+
+ll=sdf
 for country in countries:
-    replica = replica.withColumn(country,F.lit(0))
-
-
-for i,country in enumerate(countries):
+    
     for cj in countries:
         if country == cj: continue
-        tt = sdf.groupby('GEO/TIME',country,cj).agg(F.col(country)<sdf[cj]).withColumnRenamed(f'({country} < {cj})','compare')
-        #Make trues to ones
-        pp= tt.select('GEO/TIME',F.col('compare').cast("integer") )
-        replica = replica.join(pp,pp['GEO/TIME']==replica['GEO/TIME'],'inner').drop(replica['GEO/TIME'])
-        replica = replica.withColumn(country,F.col(country) + F.col('compare')).drop('compare')
+        #if 'Belgium' == cj: continue
+        ll= ll.withColumn(cj,(ll[country] < ll[cj]).cast("int").alias('compare'))
         
+        
+        #Make trues to ones
+    ll = ll.drop(country)
+    print("======================================")
+    print(f'==========={country}=================')
+    print("======================================")
+    c97 = [x.name for x in ll.schema.fields]
+    c97 = c97[1:]
+    ff = ll.select('GEO/TIME',(sum(F.col(col_name) for col_name in c97)).alias('sum'))
+    
+    max_value = ff.agg({'sum':'max'}).collect()[0][0]
+    ff.filter(ff['sum'] == max_value).show()
+    
+    ll =sdf
 
-replica.show()
- 
+
+
+
 #Add two columns
 
 #Get the max from each row
 #print yesars
-
-

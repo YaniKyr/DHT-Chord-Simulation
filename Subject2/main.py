@@ -4,17 +4,21 @@ import pandas as pd
 
 
 def getMeanByMonth(df):
-    #TODO Add Volume
-    df.groupBy(func.year('Date'),func.month('Date')).\
+    
+    df.groupBy(func.month('Date')).\
     agg(func.mean('Open')).\
-    sort(func.asc(func.year('Date')) , func.asc(func.month('Date'))).\
-    show()
+    sort(func.asc(func.month('Date'))).\
+    show(100)
 
-    df.groupBy(func.year('Date'),func.month('Date')).\
+    df.groupBy(func.month('Date')).\
     agg(func.mean('Close')).\
-    sort(func.asc(func.year('Date')) , func.asc(func.month('Date'))).\
-    show()
+    sort(func.asc(func.month('Date'))).\
+    show(100)
 
+    df.groupBy(func.month('Date')).\
+    agg(func.mean('Volume')).\
+    sort(func.asc(func.month('Date'))).\
+    show(100)
     """ 
     Repeat the calclulation for specified month
     temp = df.filter((func.year(df['Date']) == '2005') & (func.month(df['Date'])=='1'))
@@ -29,21 +33,8 @@ def higherThan(df):
 
 def highestOpPrice(df,OV):
 
-    # Test: Find the top 10 rows
-    #df.groupBy("Date").agg(func.max("Open").alias('max_val')).sort(func.desc("max_val")).limit(10).show()
-
-
-
-    #Iteration #1. The query calculates the max of a column and searches for dublicates
-    if OV == 'Volume':
-        maxval = df.select(func.max(OV).alias('maxval')).collect()[0]['maxval']  
-        df.select('Date',OV).where(func.col(OV)== maxval).show()
-
-    #Iteration #2. The querey compares the two requested columns and scans for the same 
-    #attributes
-    df.select('Date',OV,'High').where(func.col(OV) == func.col('High')).show()
-    df.select('Date',OV,'High').where(func.col(OV) == func.col('High')).show()
-    
+    maxval = df.select(func.max(OV).alias('maxval')).collect()[0]['maxval']  
+    df.select('Date',OV).where(func.col(OV)== maxval).show()
 
 
 def OpClRangePrice(df):
@@ -72,10 +63,10 @@ agndf = spark.createDataFrame(andf)
 ainvdf = spark.createDataFrame(aidf)
 alendf = spark.createDataFrame(aldf)
 
-""" 
+'''
 getMeanByMonth(agndf)
 getMeanByMonth(ainvdf)
-getMeanByMonth(aldf) 
+getMeanByMonth(alendf) 
 
 higherThan(agndf)
 higherThan(ainvdf)
@@ -83,14 +74,16 @@ higherThan(alendf)
 
 
 
-highestOpPrice(alendf,'Volume')
 highestOpPrice(agndf,'Volume')
-highestOpPrice(aidf,'Volume')
+highestOpPrice(ainvdf,'Volume')
+highestOpPrice(alendf,'Volume')
 
-highestOpPrice(alendf,'Open')
 highestOpPrice(agndf,'Open')
 highestOpPrice(ainvdf,'Open')
- """
+highestOpPrice(alendf,'Open')
 
-highestOpPrice(agndf,'Open')
+'''
 
+OpClRangePrice(agndf)
+OpClRangePrice(ainvdf)
+OpClRangePrice(alendf)
