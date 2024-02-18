@@ -1,0 +1,12 @@
+def higherThan( countries, target ="Greece"):
+    
+    for country in countries:
+        ndf= 0
+        ndf = sdf.select(F.col(target), F.col(country))
+        df_new = ndf.withColumn('res', ndf[target] > ndf[country]).groupby('res').count()
+        print('Compare',target,'with',country)
+        df_new.select('*',F.when(df_new.res == True,1).otherwise(0)).show()
+
+countries =["Spain","Bulgaria","France","Hungary","Germany"]
+
+higherThan(countries)

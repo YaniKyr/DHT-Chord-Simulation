@@ -1,0 +1,9 @@
+#STD per month 
+
+tt = hdf.groupBy(func.month('datetime')).agg(func.stddev('value'))
+
+max_stddev_value = tt.agg(func.max("stddev(value)").alias("max_stddev")).collect()[0]["max_stddev"]
+
+# Filter the DataFrame to get the row with the maximum value of stddev(value)
+max_stddev_row = tt.filter(tt["stddev(value)"] == max_stddev_value)
+max_stddev_row.show()

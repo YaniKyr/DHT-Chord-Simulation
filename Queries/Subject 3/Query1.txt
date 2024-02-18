@@ -1,0 +1,11 @@
+def HigherCountryMargin():
+    # Filter the DataFrame to include only the years from 2007 to 2014
+    filtered_df = sdf.filter((F.col("GEO/TIME") >= 2007) & (F.col("GEO/TIME") <= 2014))
+
+    # Calculate the mean for each country
+    mean_df = filtered_df.select(
+        [F.mean(col_name).alias(col_name) for col_name in sdf.columns[1:]])
+    mean_df.show()
+
+
+HigherCountryMargin()

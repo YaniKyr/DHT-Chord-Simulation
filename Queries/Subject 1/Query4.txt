@@ -1,0 +1,13 @@
+def humTempIndex(df):
+    results =[]
+    for  row in df.collect():
+        results.append(row['temp']-0.55*(1-0.01*row['hum'])*(row['temp']-14.5))
+
+    print(f'max:{max(results)}, min:{min(results)}')
+
+tdf = tdf.withColumnRenamed('value','temp')
+hdf = hdf.withColumnRenamed('value','hum')
+
+aux = tdf.join(hdf,tdf['datetime']==hdf['datetime'])
+
+humTempIndex(aux)

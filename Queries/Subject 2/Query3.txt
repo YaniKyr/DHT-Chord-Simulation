@@ -1,0 +1,12 @@
+def highestOpPrice(df,OV):
+
+    maxval = df.select(func.max(OV).alias('maxval')).collect()[0]['maxval']  
+    df.select('Date',OV).where(func.col(OV)== maxval).show()
+
+highestOpPrice(agndf,'Volume')
+highestOpPrice(ainvdf,'Volume')
+highestOpPrice(alendf,'Volume')
+
+highestOpPrice(agndf,'Open')
+highestOpPrice(ainvdf,'Open')
+highestOpPrice(alendf,'Open')

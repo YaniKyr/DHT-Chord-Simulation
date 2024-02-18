@@ -1,0 +1,9 @@
+from pyspark.sql import SparkSession
+import pyspark.sql.functions as func
+import pandas as pd
+
+andf = pd.read_csv("./agn.us.txt")
+aidf = pd.read_csv("./ainv.us.txt")
+aldf = pd.read_csv("./ale.us.txt")
+
+spark = SparkSession.builder.appName('W2').getOrCreate()

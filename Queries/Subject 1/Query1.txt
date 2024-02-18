@@ -1,0 +1,6 @@
+tdates = tdf.filter(func.col('value').between(18,22)).groupBy('date').agg(func.count('value'))
+print('+----------+')
+print("|Rows Found|")
+print("+----------+")
+print(f'|{tdates.count()}        |')
+print("+----------+")

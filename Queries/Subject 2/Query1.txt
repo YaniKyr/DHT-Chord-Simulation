@@ -1,0 +1,20 @@
+def getMeanByMonth(df):
+    
+    df.groupBy(func.month('Date')).\
+    agg(func.mean('Open')).\
+    sort(func.asc(func.month('Date'))).\
+    show(100)
+
+    df.groupBy(func.month('Date')).\
+    agg(func.mean('Close')).\
+    sort(func.asc(func.month('Date'))).\
+    show(100)
+
+    df.groupBy(func.month('Date')).\
+    agg(func.mean('Volume')).\
+    sort(func.asc(func.month('Date'))).\
+    show(100)
+
+getMeanByMonth(agndf)
+getMeanByMonth(ainvdf)
+getMeanByMonth(alendf) 

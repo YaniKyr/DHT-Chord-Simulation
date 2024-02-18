@@ -1,0 +1,6 @@
+def higherThan(df):
+    df.filter( df['Open'] > 35).agg(func.count('Date')).show()
+
+higherThan(agndf)
+higherThan(ainvdf)
+higherThan(alendf)

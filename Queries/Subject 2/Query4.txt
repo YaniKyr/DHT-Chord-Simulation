@@ -1,0 +1,15 @@
+def OpClRangePrice(df):
+    #df.groupBy("Date").agg(func.max("Open").alias('max_val')).sort(func.desc("max_val")).limit(10).show()
+
+    maxval = df.select(func.max('Open').alias('maxval')).collect()[0]['maxval']  
+
+    df.select(func.year('Date'),'Open').where(func.col('Open')== maxval).show()
+
+
+    minval = df.select(func.min('Close').alias('minval')).collect()[0]['minval']  
+
+    df.select(func.year('Date'),'Close').where(func.col('Close')== minval).show()
+
+OpClRangePrice(agndf)
+OpClRangePrice(ainvdf)
+OpClRangePrice(alendf)

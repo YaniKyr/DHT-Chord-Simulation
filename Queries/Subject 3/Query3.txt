@@ -1,0 +1,6 @@
+tt = sdf.withColumn('new',(F.greatest(*countries)))
+
+for country in countries:
+    ll = tt.select('GEO/TIME',country).where(tt[country] == tt.new)
+    if len(ll.head(1))!=0:
+        ll.show()

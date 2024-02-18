@@ -1,0 +1,22 @@
+ll=sdf
+for country in countries:
+    
+    for cj in countries:
+        if country == cj: continue
+        #if 'Belgium' == cj: continue
+        ll= ll.withColumn(cj,(ll[country] < ll[cj]).cast("int").alias('compare'))
+        
+        
+        #Make trues to ones
+    ll = ll.drop(country)
+    print("======================================")
+    print(f'==========={country}=================')
+    print("======================================")
+    c97 = [x.name for x in ll.schema.fields]
+    c97 = c97[1:]
+    ff = ll.select('GEO/TIME',(sum(F.col(col_name) for col_name in c97)).alias('sum'))
+    
+    max_value = ff.agg({'sum':'max'}).collect()[0][0]
+    ff.filter(ff['sum'] == max_value).show()
+    
+    ll =sdf
