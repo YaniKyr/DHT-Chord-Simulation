@@ -92,10 +92,10 @@ print("+----------+")
 print(f'|{tdates.count()}        |')
 print("+----------+")
 #Top 10 hottest days
-#tdf.groupBy("date").agg(func.max("value").alias('max_val')).sort(func.desc("max_val")).limit(10).show()
+tdf.groupBy("date").agg(func.max("value").alias('max_val')).sort(func.desc("max_val")).limit(10).show()
 
 #Top 10 coldest days
-#tdf.groupBy("date").agg(func.min("value").alias('min_val')).sort(func.asc("min_val")).limit(10).show()
+tdf.groupBy("date").agg(func.min("value").alias('min_val')).sort(func.asc("min_val")).limit(10).show()
 
 #STD per month 
 

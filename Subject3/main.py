@@ -39,14 +39,8 @@ def importData():
         df_original.loc[index] = df_original.loc[index].fillna(df_original.loc[index].mean()) """
     return df_original
 
-df = importData()
 
 
-spark = SparkSession.builder.appName('W1').getOrCreate()
-
-sdf = spark.createDataFrame(df)
-
-countries =["Spain","Bulgaria","France","Hungary","Germany"]
 
 def HigherCountryMargin():
     # Filter the DataFrame to include only the years from 2007 to 2014
@@ -67,12 +61,31 @@ def higherThan( countries, target ="Greece"):
         print('Compare',target,'with',country)
         df_new.select('*',F.when(df_new.res == True,1).otherwise(0)).show()
 
+
+
+
+df = importData()
+
+
+spark = SparkSession.builder.appName('W1').getOrCreate()
+
+sdf = spark.createDataFrame(df)
+
+
+'''
 #1
-#max_values_df = sdf.select("Name", F.greatest(*[F.col(c) for c in df.columns[1:]]).alias("Max_Value"))
+
+HigherCountryMargin()
+
+#2
+
+countries =["Spain","Bulgaria","France","Hungary","Germany"]
+higerThan(countries)
+
+#3
 
 countries = [x.name for x in sdf.schema.fields]
 countries = countries[1:]
-'''
 tt = sdf.withColumn('new',(F.greatest(*countries)))
 
 for country in countries:
@@ -105,11 +118,3 @@ for country in countries:
     ff.filter(ff['sum'] == max_value).show()
     
     ll =sdf
-
-
-
-
-#Add two columns
-
-#Get the max from each row
-#print yesars
